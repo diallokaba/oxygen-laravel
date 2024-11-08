@@ -31,13 +31,6 @@ COPY . .
 # Installer les dépendances PHP
 RUN composer install --optimize-autoloader --no-dev
 
-# Copier les clés OAuth dans le conteneur
-COPY storage/oauth-private.key /var/www/storage/oauth-private.key
-COPY storage/oauth-public.key /var/www/storage/oauth-public.key
-
-# Donner les permissions nécessaires
-RUN chmod 600 /var/www/storage/oauth-private.key && chmod 600 /var/www/storage/oauth-public.key
-
 # Changer les permissions pour les fichiers Laravel (storage et cache)
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 /var/www/storage \

@@ -7,6 +7,7 @@ use App\Repositories\UserRepository;
 use App\Services\IUserService;
 use App\Services\UserService;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +25,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Passport::loadKeysFrom(storage_path());
     }
 }
