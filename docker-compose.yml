@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: laravel-app
+    container_name: laravel_app
+    restart: unless-stopped
+    environment:
+      - DB_CONNECTION=pgsql
+      - DB_HOST=dpg-csmlrg08fa8c73a8eu2g-a.oregon-postgres.render.com
+      - DB_PORT=5432
+      - DB_DATABASE=oxygen_laravel
+      - DB_USERNAME=oxygen_laravel_user
+      - DB_PASSWORD=nLJiiAzGoIKUp6XNsnDLmwK19cRj1q2E
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8000:8000"
+    depends_on:
+      - database
+
+  database:
+    image: postgres:16
+    container_name: laravel_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: oxygen_laravel
+      POSTGRES_USER: oxygen_laravel_user
+      POSTGRES_PASSWORD: nLJiiAzGoIKUp6XNsnDLmwK19cRj1q2E
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
