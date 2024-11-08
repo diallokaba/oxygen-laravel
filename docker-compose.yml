@@ -5,33 +5,37 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: laravel-app
-    container_name: laravel_app
-    restart: unless-stopped
-    environment:
-      - DB_CONNECTION=pgsql
-      - DB_HOST=dpg-csmlrg08fa8c73a8eu2g-a.oregon-postgres.render.com
-      - DB_PORT=5432
-      - DB_DATABASE=oxygen_laravel
-      - DB_USERNAME=oxygen_laravel_user
-      - DB_PASSWORD=nLJiiAzGoIKUp6XNsnDLmwK19cRj1q2E
+    container_name: app
     volumes:
       - .:/var/www
     ports:
-      - "80:80"
-    depends_on:
-      - database
+      - "8000:8000"  # Le serveur Artisan écoutera sur ce port
+    networks:
+      - laravel
+    environment:
+      DB_CONNECTION: pgsql
+      DB_HOST: dpg-csmlrg08fa8c73a8eu2g-a.oregon-postgres.render.com
+      DB_PORT: 5432
+      DB_DATABASE: oxygen_laravel
+      DB_USERNAME: oxygen_laravel_user
+      DB_PASSWORD: nLJiiAzGoIKUp6XNsnDLmwK19cRj1q2E
 
-  database:
-    image: postgres:16
-    container_name: laravel_db
-    restart: unless-stopped
+  postgres:  # Service PostgreSQL
+    image: postgres:latest
+    container_name: postgres
+    restart: always
     environment:
       POSTGRES_DB: oxygen_laravel
       POSTGRES_USER: oxygen_laravel_user
       POSTGRES_PASSWORD: nLJiiAzGoIKUp6XNsnDLmwK19cRj1q2E
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - laravel
+
+networks:
+  laravel:
+    driver: bridge
 
 volumes:
-  pgdata:
+  postgres_data:  # Volume persistant pour les données PostgreSQL
