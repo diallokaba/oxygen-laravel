@@ -1,40 +1,47 @@
-# 1. Utiliser une image PHP officielle avec la version correcte et Composer
+# Utiliser une image PHP avec FPM
 FROM php:8.1-fpm
 
-# 2. Installer des dépendances système pour que Laravel fonctionne bien
+# Installer les dépendances nécessaires
 RUN apt-get update && apt-get install -y \
+    build-essential \
     libpng-dev \
-    libjpeg62-turbo-dev \
+    libjpeg-dev \
     libfreetype6-dev \
-    libonig-dev \
     libzip-dev \
-    zip \
     unzip \
     git \
     curl \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl gd
+    libonig-dev \
+    pkg-config \
+    libssl-dev \
+    libpq-dev \
+    nginx  # Ajout de Nginx
 
-# 3. Installer Composer pour la gestion des dépendances PHP
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+# Installer les extensions PHP requises pour Laravel
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd \
+    && docker-php-ext-install pdo_pgsql  # Installation du driver pdo_pgsql
 
-# 4. Définir le répertoire de travail dans le conteneur
-WORKDIR /var/www/html
+# Installer Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# 5. Copier le fichier composer.json et installer les dépendances Laravel
-COPY composer.json composer.lock ./
-RUN composer install --no-scripts --no-autoloader
-
-# 6. Copier tout le projet dans le conteneur et finaliser l'installation Composer
+# Copier le projet Laravel dans le conteneur
+WORKDIR /var/www
 COPY . .
-RUN composer dump-autoload --optimize
 
+# Installer les dépendances PHP
+RUN composer install --optimize-autoloader --no-dev
 
-# 7. Configurer les permissions pour le stockage et le cache
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Configurer Nginx pour écouter sur le port 80
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 
-# 8. Exposer le port que l’application Laravel utilise
-EXPOSE 8000
+# Changer les permissions pour les fichiers Laravel (storage et cache)
+RUN chown -R www-data:www-data /var/www \
+    && chmod -R 755 /var/www/storage \
+    && chmod -R 755 /var/www/bootstrap/cache
 
-# 9. Commande de démarrage pour PHP-FPM
-CMD ["php-fpm"]
+# Exposer le port 80 pour le serveur Nginx
+EXPOSE 80
+
+# Lancer Nginx et PHP-FPM
+CMD service nginx start && php-fpm
