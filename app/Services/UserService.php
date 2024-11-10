@@ -25,6 +25,8 @@ class UserService implements IUserService
             //create wallet for user
             Wallet::create(['user_id' => $user->id, 'balance' => 0]);
 
+            GenerateQrcodeService::generateQrcode($user);
+
             DB::commit();
             return $user;
         }catch(Exception $e){
@@ -50,6 +52,8 @@ class UserService implements IUserService
     }
 
     public function findById(int $id){
-        return $this->userRepository->findById($id);
+        $user = $this->userRepository->findById($id);
+        $user->load('wallet');
+        return $user;
     }
 }
