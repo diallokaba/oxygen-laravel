@@ -6,57 +6,63 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\Writer\PngWriter;
+use Exception;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class GenerateQrcodeService{
 
     public static function generateQrcode($user){
-        $qrCodeContent = $user->telephone;
-        $qrcode = Builder::create()
-            ->writer(new PngWriter())
-            ->data($qrCodeContent)
-            ->encoding(new Encoding('UTF-8'))
-            ->size(300)
-            ->build();
-
-        $qrcodePath = storage_path('app/temp/qrcode_' . uniqid() . '.png');
-        $qrcode->saveToFile($qrcodePath);
-
-        
-        // Chemin pour enregistrer le QR code temporaire
-        $tempDir = storage_path('app/temp'); // Utilisation de storage_path() pour obtenir le chemin absolu
-
-        // Vérifiez si le répertoire existe, sinon créez-le
-        if (!file_exists($tempDir)) {
-            mkdir($tempDir, 0777, true); // Créez le répertoire s'il n'existe pas
-        }
-        
-        $qrTempPath = $tempDir . '/qrcode_' . uniqid() . '.png';
-
-        // Enregistrer le QR code temporaire
-        file_put_contents($qrTempPath, $qrcode->getString()); // Utilisation de file_put_contents() pour écrire le fichier
-
-        $imgLink = UploadImageWithImgUr::uploadImage($qrTempPath);
-        $user->qrcode = $imgLink;
-        $user->save();
-
-        $pdf = Pdf::loadView('carte-oxygen-pdf', [
-            'nom' => $user->nom,
-            'prenom' => $user->prenom,
-            'telephone' => $user->telephone,
-            'qrcode' => $qrTempPath
-        ])->setPaper('a4', 'portrait');
-
-        // Définir le chemin temporaire du PDF
+        // Préparation du dossier temporaire
         $tempDir = storage_path('app/temp');
         if (!file_exists($tempDir)) {
-            mkdir($tempDir, 0777, true); // Créez le répertoire s'il n'existe pas
+            mkdir($tempDir, 0777, true);
         }
+        try{
+            $qrCodeContent = $user->telephone;
+            $qrcode = Builder::create()
+                ->writer(new PngWriter())
+                ->data($qrCodeContent)
+                ->encoding(new Encoding('UTF-8'))
+                ->size(300)
+                ->build();
 
-        // Sauvegarde temporaire du PDF
-        $pdfPath = $tempDir . '/fidelite_card_' . uniqid() . '.pdf';
-        $pdf->save($pdfPath);
+             // Génération d'un nom de fichier unique pour le QR code
+            $qrcodePath = $tempDir . '/qrcode_' . uniqid() . '.png';
+            
+            // Sauvegarde du QR code
+            $qrcode->saveToFile($qrcodePath);
 
-        Mail::to($user->email)->send(new SendMailWithAttachment($user,$pdfPath));
+             // Upload du QR code sur ImgUr
+            $imgLink = UploadImageWithImgUr::uploadImage($qrcodePath);
+            $user->qrcode = $imgLink;
+            $user->save();
+
+            // Génération du PDF
+            $pdf = Pdf::loadView('carte-oxygen-pdf', [
+                'nom' => $user->nom,
+                'prenom' => $user->prenom,
+                'telephone' => $user->telephone,
+                'qrcode' => $qrcodePath
+            ])->setPaper('a4', 'portrait');
+
+            // Sauvegarde temporaire du PDF
+            $pdfPath = $tempDir . '/qrcode_card_' . uniqid() . '.pdf';
+            $pdf->save($pdfPath);
+
+            Mail::to($user->email)->send(new SendMailWithAttachment($user,$pdfPath));
+
+            // Nettoyage des fichiers temporaires
+            if (file_exists($qrcodePath)) {
+                unlink($qrcodePath);
+            }
+            if (file_exists($pdfPath)) {
+                unlink($pdfPath);
+            }
+        }catch (Exception $e) {
+            // Log de l'erreur
+            Log::error('Erreur lors de la génération du QR code : ' . $e->getMessage());
+            throw $e;
+        }
     }
 }
