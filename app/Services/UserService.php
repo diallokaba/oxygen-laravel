@@ -49,4 +49,7 @@ class UserService implements IUserService
         return $this->userRepository->findAll();
     }
 
+    public function findById(int $id){
+        return $this->userRepository->findById($id);
+    }
 }

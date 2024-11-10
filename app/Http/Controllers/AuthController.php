@@ -17,7 +17,7 @@ class AuthController extends Controller
         }
 
         $token = $user->createToken('abcdxyz')->accessToken;
-        return response()->json(['token' => $token, 'role' => $user->role], 200);
+        return response()->json(['token' => $token, 'role' => $user->role, 'user_id' => $user->id], 200);
     }
 
     public function logout(){

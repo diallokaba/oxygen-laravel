@@ -20,4 +20,8 @@ class UserRepository implements IUserRepository{
     public function findAll(){
         return User::all();
     }
+
+    public function findById(int $id){
+        return User::where('id', $id)->first();
+    }
 }
