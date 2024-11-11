@@ -22,18 +22,18 @@ use Illuminate\Support\Facades\Route;
     return $request->user();
 });*/
 
-Route::prefix('v1/users')->group(function () {
-    Route::post('/register', [UserController::class, 'register']);
-    Route::get('/{id}', [UserController::class, 'getUserById']);
+Route::prefix('v1')->group(function () {
+    Route::post('/users/register', [UserController::class, 'register']);
+    Route::get('/users/{id}', [UserController::class, 'getUserById']);
 });
 
-Route::prefix('v1/transactions')->group(function () {
-    Route::post('/new', [TransactionController::class, 'store']);
+Route::prefix('v1')->group(function () {
+    Route::post('/transactions/new', [TransactionController::class, 'store']);
 });
 
-Route::prefix('v1/favoris')->group(callback: function () {
-    Route::post('/create', [FavorisController::class, 'store']);
-    Route::get('/{userId}', [FavorisController::class, 'findAllByUserId']);
+Route::prefix('v1')->group(callback: function () {
+    Route::post('/favoris/create', [FavorisController::class, 'store']);
+    Route::get('/favoris/{userId}', [FavorisController::class, 'findAllByUserId']);
 });
 
 Route::prefix('v1')->group(function () {
