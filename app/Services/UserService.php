@@ -53,7 +53,7 @@ class UserService implements IUserService
 
     public function findById(int $id){
         $user = $this->userRepository->findById($id);
-        $user->load('wallet');
+        $user->load(['wallet', 'transactions']);
         return $user;
     }
 }

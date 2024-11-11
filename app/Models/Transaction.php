@@ -26,10 +26,10 @@ class Transaction extends Model
 
     public function sender()
     {
-        return $this->belongsTo(User::class, 'sender_id');
+        return $this->belongsTo(User::class, foreignKey: 'sender_id');
     }
 
-    public function canCancel()
+    public function cancel()
     {
         return $this->status === 'SUCCES' && 
                $this->created_at->diffInMinutes(now()) <= 30;
