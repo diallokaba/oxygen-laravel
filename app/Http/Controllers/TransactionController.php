@@ -34,7 +34,7 @@ class TransactionController extends Controller
             return response()->json($transaction, 201);
         } catch (\Exception $e) {
             // Gérer les exceptions et retourner une réponse avec un message d'erreur
-            return response()->json(['error' => 'Une erreur est survenue lors de la transaction.'], 500);
+            return response()->json(['error' => 'Une erreur est survenue lors de la transaction.', 'message' => $e->getMessage()], 500);
         }
     }
 }

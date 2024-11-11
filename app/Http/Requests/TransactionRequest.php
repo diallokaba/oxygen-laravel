@@ -26,7 +26,8 @@ class TransactionRequest extends FormRequest
         return [
             'sender_id' => 'required|exists:users,id',
             'receiver_phone' => 'required|string|exists:users,telephone',
-            'amount' => 'required|numeric|min:1'
+            'amount' => 'required|numeric|min:1',
+            'type' => 'required|string',
         ];
     }
 
@@ -39,7 +40,9 @@ class TransactionRequest extends FormRequest
             'receiver_phone.exists' => 'Le destinataire n\'existe pas dans notre système.',
             'amount.required' => 'Le montant est requis.',
             'amount.numeric' => 'Le montant doit être un nombre.',
-            'amount.min' => 'Le montant doit être au moins de 1.'
+            'amount.min' => 'Le montant doit être au moins de 1.',
+            'type.required' => 'Le type de transaction est requis.',
+            'type.string' => 'Le type de transaction doit être une chaîne de caractères.',
         ];
     }
     
