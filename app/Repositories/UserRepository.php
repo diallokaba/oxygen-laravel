@@ -24,4 +24,8 @@ class UserRepository implements IUserRepository{
     public function findById(int $id){
         return User::where('id', $id)->first();
     }
+
+    public function findByPhoneNumber(string $phoneNumber){
+        return User::where('telephone', $phoneNumber)->first();
+    }
 }

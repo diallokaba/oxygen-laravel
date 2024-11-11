@@ -2,13 +2,10 @@
 
 namespace App\Services;
 
-interface IUserService
-{
+interface ITransactionService{
     public function save(array $data);
     public function update(int $id, array $data);
-    public function findByEmailOrTelephone(string $email, string $telephone);
+    public function delete(int $id);
     public function findAll();
     public function findById(int $id);
-    public function findByPhoneNumber(string $phoneNumber);
 }
-

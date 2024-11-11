@@ -56,4 +56,9 @@ class UserService implements IUserService
         $user->load(['wallet', 'transactions']);
         return $user;
     }
+
+    public function findByPhoneNumber(string $phoneNumber)
+    {
+        return $this->userRepository->findByPhoneNumber($phoneNumber);
+    }
 }

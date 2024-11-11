@@ -2,11 +2,10 @@
 
 namespace App\Repositories;
 
-interface IUserRepository{
+interface IFavorisRepository{
     public function save(array $data);
     public function update(int $id, array $data);
-    public function findByEmailOrTelephone(string $email, string $telephone);
+    public function delete(int $id);
     public function findAll();
     public function findById(int $id);
-    public function findByPhoneNumber(string $phoneNumber);
 }
